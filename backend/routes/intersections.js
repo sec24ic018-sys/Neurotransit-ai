@@ -84,6 +84,38 @@ router.post('/:id/traffic', validateIntersectionId, validateTrafficData, (req, r
 });
 
 /**
+ * POST /api/intersections/:id/update
+ * Updates vehicle data received from the Python computer vision engine
+ */
+router.post('/:id/update', validateIntersectionId, validateTrafficData, (req, res) => {
+  try {
+    const { vehicleCount } = req.body;
+    const intersection = global.intersections.get(req.params.id);
+    const greenTime = Math.min(Math.max(Math.round(vehicleCount * 1.8), 15), 90);
+    const redTime = Math.max(0, 60 - greenTime - (intersection.yellowTime || 5));
+
+    intersection.vehicleCount = vehicleCount;
+    intersection.greenTime = greenTime;
+    intersection.redTime = redTime;
+    intersection.waitTime = Math.round(redTime * 0.9);
+    intersection.lastUpdated = new Date().toISOString();
+
+    res.json({
+      success: true,
+      message: 'Traffic data updated',
+      data: intersection,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('Error updating AI traffic data:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update AI traffic data'
+    });
+  }
+});
+
+/**
  * GET /api/intersections/:id/signal
  * Returns current signal timing for intersection
  */

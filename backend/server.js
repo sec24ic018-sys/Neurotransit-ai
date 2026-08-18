@@ -88,6 +88,7 @@ setInterval(() => {
     const optimized = optimizeSignal(intersection.vehicleCount);
     intersection.greenTime = optimized.greenTime;
     intersection.redTime = optimized.redTime;
+    intersection.waitTime = Math.round(intersection.redTime * 0.9);
     intersection.efficiency = Math.random() * 100;
 
     // Add to history

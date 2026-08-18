@@ -158,6 +158,42 @@ npm start
 # Dashboard opens at http://localhost:3000
 ```
 
+### Computer Vision Traffic Detection
+
+Run the Python YOLOv8 engine in a separate terminal after starting the backend:
+
+```bash
+cd backend
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+python traffic_detector.py
+```
+
+The engine loads `yolov8n.pt`, reads `traffic_feed.mp4` by default, and sends vehicle counts for `CHN-001` to the backend every two seconds. Pass `0` to use the default webcam instead:
+
+```bash
+python traffic_detector.py 0
+```
+
+### Launch All Services
+
+From the repository root, install the root launcher dependency once:
+
+```bash
+npm install
+python -m pip install -r backend/requirements.txt
+```
+
+Then start the backend, frontend, and AI engine together:
+
+```bash
+npm run dev
+```
+
+On macOS/Linux, `./start-all.sh` performs prerequisite checks and starts the same services. On Windows, run `start-all.bat`. The combined output uses cyan for `[BACKEND]`, green for `[FRONTEND]`, and yellow for `[AI ENGINE]`.
+
 ---
 
 ## API Documentation

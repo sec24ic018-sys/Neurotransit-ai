@@ -1,0 +1,13 @@
+{
+  "name": "neurotransit-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NeuroTransit AI full-stack development launcher",
+  "scripts": {
+    "start": "concurrently --kill-others-on-fail -n BACKEND,FRONTEND,AI ENGINE -c cyan,green,yellow \"npm start --prefix backend\" \"npm start --prefix frontend\" \"python backend/traffic_detector.py\"",
+    "dev": "npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
