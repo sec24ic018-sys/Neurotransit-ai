@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NeuroTransit Traffic Simulation</title>
+    <style>body{margin:0;background:#101820;color:#f2f5f7;font:16px sans-serif}canvas{display:block;margin:2rem auto;max-width:calc(100% - 2rem);border:1px solid #43515c}</style>
+  </head>
+  <body>
+    <canvas id="simulation" width="900" height="420"></canvas>
+    <script>
+      const canvas = document.getElementById('simulation');
+      const context = canvas.getContext('2d');
+      let offset = 0;
+      function draw() {
+        context.fillStyle = '#101820'; context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = '#26343d'; context.fillRect(0, 170, canvas.width, 80); context.fillRect(410, 0, 80, canvas.height);
+        context.fillStyle = '#f2c94c';
+        for (let x = -80 + offset; x < canvas.width; x += 120) context.fillRect(x, 207, 60, 5);
+        for (let y = -80 + offset; y < canvas.height; y += 120) context.fillRect(447, y, 5, 60);
+        context.fillStyle = '#55d68b';
+        for (let x = 40; x < canvas.width; x += 130) { context.fillRect((x + offset) % canvas.width, 185, 30, 16); }
+        offset = (offset + 2) % 120; requestAnimationFrame(draw);
+      }
+      draw();
+    </script>
+  </body>
+</html>
