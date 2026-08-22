@@ -5,13 +5,14 @@ let client = null;
 
 async function initMQTT() {
   try {
-    const brokerURL = process.env.MQTT_BROKER || 'mqtt://test.mosquitto.org';
+    const brokerURL = process.env.MQTT_BROKER || 'mqtt://broker.hivemq.com';
     const options = {
       port: process.env.MQTT_PORT || 1883,
       username: process.env.MQTT_USER || undefined,
       password: process.env.MQTT_PASS || undefined,
       clean: true,
-      reconnectPeriod: 1000,
+      reconnectPeriod: 5000,
+      connectTimeout: 10000,
       clientId: `neurotransit-ai-${Date.now()}`
     };
 
@@ -40,11 +41,16 @@ async function initMQTT() {
     });
 
     client.on('error', (error) => {
-      logger.error('MQTT Error:', error);
+      // Only log connection errors at debug level to avoid log spam
+      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
+        logger.debug(`MQTT Connection Error (${error.code}): Retrying...`);
+      } else {
+        logger.error('MQTT Error:', error);
+      }
     });
 
     client.on('reconnect', () => {
-      logger.info('Reconnecting to MQTT Broker');
+      logger.debug('Attempting to reconnect to MQTT Broker...');
     });
 
   } catch (error) {

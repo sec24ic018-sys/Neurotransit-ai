@@ -20,9 +20,9 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not exist "node_modules" (
+if not exist "node_modules\.bin\concurrently.cmd" (
   echo [INFO] Installing root dependencies...
-  call npm install
+  call npm.cmd install
   if errorlevel 1 exit /b 1
 )
 
