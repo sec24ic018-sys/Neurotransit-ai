@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroTransit AI - Traffic Visualizer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    #sidebar {
+      width: 320px;
+      background: rgba(20, 20, 30, 0.95);
+      color: white;
+      overflow-y: auto;
+      border-right: 2px solid #667eea;
+      padding: 20px;
+    }
+
+    #sidebar h1 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .intersection-item {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .intersection-item:hover {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+      transform: translateX(5px);
+    }
+
+    .intersection-item.active {
+      background: rgba(102, 126, 234, 0.4);
+      border-color: #667eea;
+      box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+    }
+
+    .intersection-name {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .intersection-id {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      color: #aaa;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .density-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .density-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00ff00, #ffaa00, #ff0000);
+      transition: width 0.5s;
+    }
+
+    #controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(20, 20, 30, 0.9);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 15px;
+      color: white;
+      z-index: 100;
+      min-width: 250px;
+    }
+
+    .control-group {
+      margin-bottom: 12px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 8px 10px;
+      background: rgba(102, 126, 234, 0.2);
+      border: 1px solid #667eea;
+      color: white;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: 'Segoe UI', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      background: rgba(102, 126, 234, 0.4);
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+    }
+
+    button {
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      background: rgba(102, 126, 234, 0.4);
+    }
+
+    button.active {
+      background: #667eea;
+      box-shadow: 0 0 15px rgba(102, 126, 234, 0.7);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 5px;
+      animation: pulse 2s infinite;
+    }
+
+    .status-indicator.connected {
+      background: #00ff00;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    .status-indicator.disconnected {
+      background: #ff3333;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    #legend {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(20, 20, 30, 0.9);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 15px;
+      color: white;
+      z-index: 100;
+      font-size: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .legend-item:last-child {
+      margin-bottom: 0;
+    }
+
+    #p5Container {
+      flex: 1;
+      position: relative;
+    }
+
+    #status {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(20, 20, 30, 0.9);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 10px 15px;
+      color: white;
+      font-size: 12px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h1>🚗 Intersections</h1>
+    <div id="intersectionList"></div>
+  </div>
+
+  <div id="p5Container"></div>
+
+  <div id="controls">
+    <div class="control-group">
+      <div class="control-label">API Endpoint</div>
+      <input type="text" id="apiEndpoint" placeholder="http://localhost:5000" value="http://localhost:5000">
+    </div>
+    <div class="control-group">
+      <div class="control-label">Update Interval (ms)</div>
+      <input type="number" id="updateInterval" value="2000" min="500" max="10000" step="500">
+    </div>
+    <div class="control-group">
+      <button id="toggleBtn" class="active">⏹ Stop Simulation</button>
+    </div>
+    <div class="control-group" style="font-size: 11px; color: #aaa;">
+      <span class="status-indicator disconnected" id="statusIndicator"></span>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </div>
+
+  <div id="legend">
+    <div style="font-weight: bold; margin-bottom: 8px;">Congestion Level</div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #00ff00;"></div>
+      <span>Low (0-40%)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ffaa00;"></div>
+      <span>Medium (40-60%)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ff5500;"></div>
+      <span>High (60-75%)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ff0000;"></div>
+      <span>Critical (75%+)</span>
+    </div>
+  </div>
+
+  <div id="status">
+    <span id="updateTime">Last Update: --:--:--</span>
+  </div>
+
+  <script>
+    // Configuration
+    let apiEndpoint = 'http://localhost:5000';
+    let updateInterval = 2000;
+    let isSimulating = true;
+    let intersectionsData = [];
+    let selectedIntersection = null;
+
+    // p5.js sketch
+    let sketch = (p) => {
+      p.setup = function() {
+        const container = document.getElementById('p5Container');
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        p.createCanvas(w, h);
+        p.textAlign(p.CENTER, p.CENTER);
+      };
+
+      p.draw = function() {
+        // Background
+        p.background(30, 30, 40);
+
+        // Draw grid
+        p.stroke(102, 126, 234, 20);
+        p.strokeWeight(1);
+        for (let i = 0; i < p.width; i += 100) {
+          p.line(i, 0, i, p.height);
+        }
+        for (let i = 0; i < p.height; i += 100) {
+          p.line(0, i, p.width, i);
+        }
+
+        // Draw intersections
+        if (intersectionsData.length === 0) {
+          p.fill(200);
+          p.textSize(16);
+          p.text('Loading traffic data...', p.width / 2, p.height / 2);
+          return;
+        }
+
+        const cols = 3;
+        const rows = 2;
+        const spacing = p.width / (cols + 1);
+        const vSpacing = p.height / (rows + 1);
+
+        intersectionsData.forEach((intersection, index) => {
+          const col = index % cols;
+          const row = Math.floor(index / cols);
+          const x = spacing * (col + 1);
+          const y = vSpacing * (row + 1);
+
+          drawIntersection(p, intersection, x, y, selectedIntersection?.id === intersection.id);
+        });
+      };
+
+      p.windowResized = function() {
+        if (document.querySelector('#p5Container')) {
+          const container = document.getElementById('p5Container');
+          const w = container.clientWidth;
+          const h = container.clientHeight;
+          p.resizeCanvas(w, h);
+        }
+      };
+    };
+
+    function drawIntersection(p, data, x, y, isSelected) {
+      // Calculate circle size based on density
+      const maxRadius = 80;
+      const radius = maxRadius * (data.density / 100);
+
+      // Get color based on congestion level
+      let color;
+      switch (data.congestionLevel) {
+        case 'low':
+          color = p.color(0, 255, 0);
+          break;
+        case 'medium':
+          color = p.color(255, 170, 0);
+          break;
+        case 'high':
+          color = p.color(255, 85, 0);
+          break;
+        case 'critical':
+          color = p.color(255, 0, 0);
+          break;
+        default:
+          color = p.color(200, 200, 200);
+      }
+
+      // Draw outer ring if selected
+      if (isSelected) {
+        p.noFill();
+        p.stroke(color);
+        p.strokeWeight(3);
+        p.circle(x, y, radius * 2.5);
+      }
+
+      // Draw circle
+      p.fill(color);
+      p.stroke(255);
+      p.strokeWeight(2);
+      p.circle(x, y, radius * 2);
+
+      // Draw text
+      p.fill(255);
+      p.textSize(12);
+      p.textStyle(p.BOLD);
+      p.text(data.name.split(' ')[0], x, y - 15);
+
+      p.textSize(10);
+      p.textStyle(p.NORMAL);
+      p.fill(255, 200);
+      p.text(`${data.density}%`, x, y);
+      p.text(`${data.vehicleCount} vehicles`, x, y + 15);
+    }
+
+    // Initialize p5.js
+    new p5(sketch);
+
+    // Fetch traffic data
+    async function fetchData() {
+      try {
+        const response = await fetch(`${apiEndpoint}/api/intersections`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        intersectionsData = data;
+
+        // Update status
+        document.getElementById('statusIndicator').className = 'status-indicator connected';
+        document.getElementById('statusText').textContent = 'Connected';
+        document.getElementById('updateTime').textContent = `Last Update: ${new Date().toLocaleTimeString()}`;
+
+        // Update sidebar
+        updateSidebar();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        document.getElementById('statusIndicator').className = 'status-indicator disconnected';
+        document.getElementById('statusText').textContent = 'Disconnected';
+      }
+    }
+
+    function updateSidebar() {
+      const listContainer = document.getElementById('intersectionList');
+      listContainer.innerHTML = '';
+
+      intersectionsData.forEach(intersection => {
+        const div = document.createElement('div');
+        div.className = 'intersection-item' + (selectedIntersection?.id === intersection.id ? ' active' : '');
+        div.onclick = () => {
+          selectedIntersection = intersection;
+          updateSidebar();
+        };
+
+        const densityPercent = Math.round((intersection.density / 100) * 100);
+        div.innerHTML = `
+          <div class="intersection-name">${intersection.name}</div>
+          <div class="intersection-id">${intersection.id}</div>
+          <div class="stat-row">
+            <span class="stat-label">Vehicles:</span>
+            <span class="stat-value">${intersection.vehicleCount}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Density:</span>
+            <span class="stat-value">${Math.round(intersection.density)}%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Speed:</span>
+            <span class="stat-value">${Math.round(intersection.averageSpeed)} km/h</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Status:</span>
+            <span class="stat-value">${intersection.congestionLevel.toUpperCase()}</span>
+          </div>
+          <div class="density-bar">
+            <div class="density-fill" style="width: ${densityPercent}%;"></div>
+          </div>
+        `;
+
+        listContainer.appendChild(div);
+      });
+    }
+
+    // UI Controls
+    document.getElementById('apiEndpoint').addEventListener('change', (e) => {
+      apiEndpoint = e.target.value;
+      fetchData();
+    });
+
+    document.getElementById('updateInterval').addEventListener('change', (e) => {
+      updateInterval = parseInt(e.target.value);
+      clearInterval(window.dataInterval);
+      window.dataInterval = setInterval(fetchData, updateInterval);
+    });
+
+    document.getElementById('toggleBtn').addEventListener('click', (e) => {
+      isSimulating = !isSimulating;
+      e.target.textContent = isSimulating ? '⏹ Stop Simulation' : '▶ Start Simulation';
+      e.target.classList.toggle('active');
+
+      if (isSimulating) {
+        fetchData();
+        window.dataInterval = setInterval(fetchData, updateInterval);
+      } else {
+        clearInterval(window.dataInterval);
+      }
+    });
+
+    // Start fetching data
+    fetchData();
+    window.dataInterval = setInterval(fetchData, updateInterval);
+  </script>
+</body>
+</html>

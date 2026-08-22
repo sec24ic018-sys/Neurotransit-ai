@@ -1,0 +1,30 @@
+{
+  "name": "neurotransit-ai-simulator",
+  "version": "1.0.0",
+  "description": "MQTT Hardware Simulator for NeuroTransit AI Traffic Management System",
+  "main": "mqtt-simulator.js",
+  "scripts": {
+    "start": "node mqtt-simulator.js",
+    "dev": "nodemon mqtt-simulator.js"
+  },
+  "keywords": [
+    "mqtt",
+    "traffic",
+    "simulator",
+    "iot",
+    "esp32"
+  ],
+  "author": "SmartAIthon Team",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^5.0.0",
+    "axios": "^1.4.0",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

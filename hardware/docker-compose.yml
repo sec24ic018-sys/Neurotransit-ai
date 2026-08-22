@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # MQTT Broker - Mosquitto
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: neurotransit-mqtt
+    ports:
+      - "1883:1883"      # MQTT protocol port
+      - "9001:9001"      # WebSocket port
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-logs:/mosquitto/log
+    environment:
+      - TZ=Asia/Kolkata
+    networks:
+      - neurotransit-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-h", "localhost", "-t", "$SYS/broker/clients/connected"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: MQTT WebUI for monitoring
+  mqtt-ui:
+    image: cedalo/management-center:latest
+    container_name: neurotransit-mqtt-ui
+    ports:
+      - "8080:8080"
+    environment:
+      MQTT_BROKER_URL: mqtt://mosquitto:1883
+      TZ: Asia/Kolkata
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - neurotransit-network
+    restart: unless-stopped
+
+volumes:
+  mosquitto-data:
+  mosquitto-logs:
+
+networks:
+  neurotransit-network:
+    driver: bridge
