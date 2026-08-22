@@ -6,8 +6,11 @@ import requests
 from ultralytics import YOLO
 
 
+import os
+
 MODEL_PATH = "yolov8n.pt"
-UPDATE_URL = "http://localhost:5000/api/intersections/CHN-001/update"
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:5000")
+UPDATE_URL = f"{BACKEND_URL}/api/intersections/CHN-001/update"
 VEHICLE_CLASSES = {2, 3, 5, 7}  # car, motorcycle, bus, truck
 UPDATE_INTERVAL_SECONDS = 2
 

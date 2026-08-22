@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Activity, MapPin, BarChart3, Radio, Clock, Leaf, Zap } from 'lucide-react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
+import { Activity, MapPin, BarChart3 } from 'lucide-react';
 
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
@@ -9,37 +9,36 @@ import Analytics from './pages/Analytics';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-
   return (
     <Router>
       <div className="app-container">
         <Header />
 
         <div className="navigation-tabs">
-          <button
-            className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
           >
             <Activity size={20} />
             <span>Dashboard</span>
-          </button>
+          </NavLink>
 
-          <button
-            className={`nav-tab ${activeTab === 'intersections' ? 'active' : ''}`}
-            onClick={() => setActiveTab('intersections')}
+          <NavLink
+            to="/intersections"
+            className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
           >
             <MapPin size={20} />
             <span>Intersections</span>
-          </button>
+          </NavLink>
 
-          <button
-            className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analytics')}
+          <NavLink
+            to="/analytics"
+            className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
           >
             <BarChart3 size={20} />
             <span>Analytics</span>
-          </button>
+          </NavLink>
         </div>
 
         <main className="main-content">

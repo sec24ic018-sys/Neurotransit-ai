@@ -53,9 +53,11 @@ export const useTrafficData = (refreshInterval = 5000) => {
     let isMounted = true;
     let intervalId;
 
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
     const fetchTrafficData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/intersections');
+        const response = await fetch(`${API_BASE_URL}/intersections`);
         if (response.ok) {
           const data = await response.json();
           if (isMounted) {
