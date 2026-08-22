@@ -1,5 +1,4 @@
-import React from 'react';
-import { Radio, Activity, Zap } from 'lucide-react';
+import { Radio } from 'lucide-react';
 
 const Header = () => {
   return (

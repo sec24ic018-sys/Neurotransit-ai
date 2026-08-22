@@ -1,5 +1,4 @@
-import React from 'react';
-import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 const StatusIndicator = ({ status = 'active', vehicleCount = 0, efficiency = 0 }) => {
   const getStatusColor = (status) => {

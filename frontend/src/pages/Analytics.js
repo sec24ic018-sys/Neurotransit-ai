@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Leaf, Activity } from 'lucide-react';
+import { TrendingUp, Leaf, Activity } from 'lucide-react';
 import KPICard from '../components/KPICard';
 import Chart from '../components/Chart';
 import { analyticsAPI } from '../services/api';
