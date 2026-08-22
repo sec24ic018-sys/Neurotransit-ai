@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: neurotransit-ai-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: ENABLE_SIMULATION
+        value: true
+      - key: SIMULATION_INTERVAL
+        value: 5000
